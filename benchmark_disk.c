@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <pthread.h>
 
 #define CAPACITY 1000000000
-
-//file stream
-FILE *pFile;
 
 //random access read the disk
 void *random_read(void *block_size)
@@ -16,26 +17,31 @@ void *random_read(void *block_size)
 	int size = (int)(long)block_size;
 	srand((unsigned)time(NULL));
 	
+	int fd;
 	//open binary file
-	pFile = fopen("test.bin", "rb");
-	if(pFile == NULL)
+	fd = open("test.bin", O_RDONLY, 0666);
+	if(fd < 0)
 	{
-		printf("FILE error\n");
+		printf("Error: open\n");
 		exit(-1);
 	}
-	
+
+	int capacity = (size == 1) ? (CAPACITY / 50) :CAPACITY;
 	//randomly read the disk
-	for(i = 0; i < CAPACITY / size; i++)
+	for(i = 0; i < capacity / size; i++)
 	{
-		ran = rand()%(CAPACITY / size);
+		ran = rand()%(capacity / size);
 		char *buffer = (char*)malloc(sizeof(char) * size);
 		//randomly move the indicator of file stream
-		fseek(pFile, ran * size, SEEK_SET);
+		lseek(fd, ran * size, SEEK_SET);
 		//read block size of file from the disk
-		fread(buffer, 1, size, pFile);
+		read(fd, buffer, size);
+		//fgets(buffer, size, pFile);
 		//return the indicator to the start of file
-		rewind(pFile);
+		//lseek(fd, 0, SEEK_SET);
 	}
+
+	close(fd);
 }
 
 //random access write the disk
@@ -46,26 +52,30 @@ void *random_write(void *block_size)
 	srand((unsigned)time(NULL));
 	
 	//open binary file
-	pFile = fopen("test.bin", "wb");
-	if(pFile == NULL)
+	int fd;
+	fd = open("test.bin", O_CREAT|O_TRUNC|O_WRONLY, 0666);
+	if(fd < 0)
 	{
-		printf("FILE error\n");
+		printf("Error: open\n");
 		exit(-1);
 	}
 	
+	int capacity = (size == 1) ? (CAPACITY / 50) :CAPACITY;
 	//randomly write the disk
-	for(i = 0; i < CAPACITY / size; i++)
+	for(i = 0; i < capacity / size; i++)
 	{
-		ran = rand()%(CAPACITY / size);
+		ran = rand()%(capacity / size);
 		char *buffer = (char*)malloc(sizeof(char) * size);
 		memset(buffer, 'a', size);
 		//randomly move the indicator of file stream
-		fseek(pFile, ran * size, SEEK_SET);
+		lseek(fd, ran * size, SEEK_SET);
 		//write block size of file to the disk
-		fwrite(buffer, 1, size, pFile);
+		write(fd, buffer, size);
 		//return the indicator to the start of file
-		rewind(pFile);
+		//lseek(fd, 0, SEEK_SET);
 	}
+
+	close(fd);
 }
 
 //sequential access read the disk
@@ -75,21 +85,25 @@ void *sequential_read(void *block_size)
 	int size = (int)(long)block_size;
 	
 	//open binary file
-	pFile = fopen("test.bin", "rb");
-	if(pFile == NULL)
+	int fd;
+	fd = open("test.bin", O_RDONLY, 0666);
+	if(fd < 0)
 	{
-		printf("FILE error\n");
+		printf("Error: open\n");
 		exit(-1);
 	}
 	
+	int capacity = (size == 1) ? (CAPACITY / 50) :CAPACITY;
 	//sequential read the disk
-	for(i = 0; i < CAPACITY / size; i++)
+	for(i = 0; i < capacity / size; i++)
 	{
 		char *buffer = (char*)malloc(sizeof(char) * size);
 		//after fread, the indicator of stream would be set to the current location
 		//there is no need to move the indicator like randomly access
-		fread(buffer, 1, size, pFile);
+		read(fd, buffer, size);
 	}
+
+	close(fd);
 }
 
 //sequential access write the disk
@@ -99,22 +113,26 @@ void *sequential_write(void *block_size)
 	int size = (int)(long)block_size;
 	
 	//open binary file
-	pFile = fopen("test.bin", "wb");
-	if(pFile == NULL)
+	int fd;
+	fd = open("test.bin", O_CREAT|O_TRUNC|O_WRONLY, 0666);
+	if(fd < 0)
 	{
-		printf("FILE error\n");
+		printf("Error: open\n");
 		exit(-1);
 	}
 	
+	int capacity = (size == 1) ? (CAPACITY / 50) :CAPACITY;
 	//sequential write the disk
-	for(i = 0; i < CAPACITY / size; i++)
+	for(i = 0; i < capacity / size; i++)
 	{
 		char *buffer = (char*)malloc(sizeof(char) * size);
 		memset(buffer, 'a', size);
 		//after fwrite, the indicator of stream would be set to the current location
 		//there is no need to move the indicator like randomly access
-		fwrite(buffer, 1, size, pFile);
+		write(fd, buffer, size);
 	}
+
+	close(fd);
 }
 
 int main(int argc, char const *argv[])
@@ -123,8 +141,8 @@ int main(int argc, char const *argv[])
 	if(argc != 5)
 	{
 		printf("usage: %s <operation type> <access type> <block size> <num of threads>\n", argv[0]);
-		printf("operation type: \n-R    read\n-W    write    \
-			\naccess type: \n-s    sequential\n-r    random    \
+		printf("operation type: \nRead    Read disk\nWrite    Write disk   \
+			\naccess type: \nseq    sequential\nran    random    \
 			\nblock size: 1b, 1kb, 1mb, 1gb\n");
 		exit(-1);
 	}
@@ -169,15 +187,15 @@ int main(int argc, char const *argv[])
 	for(i = 0; i < numThread; i++)
 	{
 		//read
-		if(strcmp(argv[1], "-R") == 0)
+		if(strcmp(argv[1], "Read") == 0)
 		{
 			//sequential
-			if(strcmp(argv[2], "-s") == 0)
+			if(strcmp(argv[2], "seq") == 0)
 			{
 				pthread_create(&tid[i], NULL, sequential_read, (void*)(long)block_size);
 			}
 			//random
-			else if(strcmp(argv[2], "-r") == 0)
+			else if(strcmp(argv[2], "ran") == 0)
 			{
 				pthread_create(&tid[i], NULL, random_read, (void*)(long)block_size);
 			}
@@ -188,15 +206,15 @@ int main(int argc, char const *argv[])
 			}
 		}
 		//write
-		else if(strcmp(argv[1], "-W") == 0)
+		else if(strcmp(argv[1], "Write") == 0)
 		{
 			//sequential
-			if(strcmp(argv[2], "-s") == 0)
+			if(strcmp(argv[2], "seq") == 0)
 			{
 				pthread_create(&tid[i], NULL, sequential_write, (void*)(long)block_size);
 			}
 			//random
-			else if(strcmp(argv[2], "-r") == 0)
+			else if(strcmp(argv[2], "ran") == 0)
 			{
 				pthread_create(&tid[i], NULL, random_write, (void*)(long)block_size);
 			}
@@ -224,8 +242,9 @@ int main(int argc, char const *argv[])
 	usecstart = (unsigned long long)etstart.tv_sec * 1000000 + etstart.tv_usec;
 	usecstop = (unsigned long long)etstop.tv_sec * 1000000 + etstop.tv_usec;
 
+	int capacity = (block_size == 1) ? (CAPACITY / 50) :CAPACITY;
 	float elapsed_time = (float)(usecstop - usecstart) / 1000;
-	float through_put = (float)numThread * CAPACITY / elapsed_time * 1000 / 1e6;
+	float through_put = (float)numThread * capacity / elapsed_time * 1000 / 1e6;
 
 	printf("Elapsed time %.3f ms, %.3f MB/sec\n", elapsed_time, through_put);
 	return 0;

@@ -1,0 +1,5 @@
+Elapsed time 3485.620 ms, 1.434 Gflops/Giops
+Elapsed time 3556.034 ms, 1.406 Gflops/Giops
+Elapsed time 3432.181 ms, 1.457 Gflops/Giops
+Elapsed time 3279.349 ms, 1.525 Gflops/Giops
+Elapsed time 3305.399 ms, 1.513 Gflops/Giops

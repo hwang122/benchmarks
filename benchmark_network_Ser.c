@@ -10,7 +10,7 @@
 //port number
 #define PORT 8888
 //buffer size to be received
-#define BUFFER_SIZE 5000000
+#define BUFFER_SIZE 25000000
 
 //server TCP
 void *Ser_TCP(void *thread_id)
@@ -146,7 +146,7 @@ int main(int argc, char const *argv[])
 	if(argc != 3)
 	{
 		printf("usage: %s <connect type> <num of thread>\n", argv[0]);
-		printf("connect type: \n-t    TCP\n-u    UDP\n");
+		printf("connect type: \ntcp    TCP\nudp    UDP\n");
 		exit(-1);
 	}
 
@@ -156,7 +156,7 @@ int main(int argc, char const *argv[])
 	pthread_t tid[numThread];
 	
 	//connect type is TCP
-	if(strcmp(argv[1], "-t") == 0)
+	if(strcmp(argv[1], "tcp") == 0)
 	{
 		//run several servers at the same time
 		for (i = 0; i < numThread; i++)
@@ -165,7 +165,7 @@ int main(int argc, char const *argv[])
 		}
 	}
 	//connect type is UDP
-	else if(strcmp(argv[1], "-u") == 0)
+	else if(strcmp(argv[1], "udp") == 0)
 	{
 		//run several servers at the same time
 		for(i = 0; i < numThread; i++)

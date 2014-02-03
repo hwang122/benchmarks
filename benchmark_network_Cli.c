@@ -12,7 +12,7 @@
 //port number
 #define PORT 8888
 //buffer size to be sent
-#define BUFFER_SIZE 1000000
+#define BUFFER_SIZE 5000000
 
 //parameters passed in pthread
 typedef struct Data
@@ -136,7 +136,7 @@ int main(int argc, char const *argv[])
 	if(argc != 4)
 	{
 		printf("usage: %s <connect type> <packet size> <num of thread>\n", argv[0]);
-		printf("connect type: \n-t    TCP\n-u    UDP\n");
+		printf("connect type: \ntcp    TCP\nudp    UDP\n");
 		printf("packet size: 1b, 1kb, 64kb\n");
 		exit(-1);
 	}
@@ -157,7 +157,7 @@ int main(int argc, char const *argv[])
 	}
 	else if(strcmp(argv[2], "64kb") == 0)
 	{
-		SendBuf = 65536;
+		SendBuf = 65507;
 	}
 	else
 	{
@@ -177,7 +177,7 @@ int main(int argc, char const *argv[])
 	gettimeofday(&etstart, NULL);
 	
 	//TCP
-	if(strcmp(argv[1], "-t") == 0)
+	if(strcmp(argv[1], "tcp") == 0)
 	{
 		//run several clients at the same time
 		for (i = 0; i < numThread; i++)
@@ -187,7 +187,7 @@ int main(int argc, char const *argv[])
 		}
 	}
 	//UDP
-	else if(strcmp(argv[1], "-u") == 0)
+	else if(strcmp(argv[1], "udp") == 0)
 	{
 		//run several clients at the same time
 		for(i = 0; i < numThread; i++)

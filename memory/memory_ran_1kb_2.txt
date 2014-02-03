@@ -1,0 +1,5 @@
+Elapsed time 16581.883 ms, 241.227 MB/sec
+Elapsed time 22631.744 ms, 176.743 MB/sec
+Elapsed time 33120.215 ms, 120.772 MB/sec
+Elapsed time 22050.725 ms, 181.400 MB/sec
+Elapsed time 29287.992 ms, 136.575 MB/sec

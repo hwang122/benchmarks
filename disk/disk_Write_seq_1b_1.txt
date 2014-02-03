@@ -1,0 +1,1 @@
+Elapsed time 31723.629 ms, 0.630 MB/sec

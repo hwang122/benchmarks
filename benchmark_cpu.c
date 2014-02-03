@@ -42,7 +42,7 @@ int main(int argc, char const *argv[])
 	if(argc != 3)
 	{
 		printf("usage: %s <operation type> <num of threads>\n", argv[0]);
-		printf("operation type: \n-i    IOPS\n-f    FLOPS\n");
+		printf("operation type: \niops    IOPS\nflops    FLOPS\n");
 		exit(-1);
 	}
 
@@ -61,9 +61,9 @@ int main(int argc, char const *argv[])
 	//run several threads at the same time
 	for(i = 0; i < numThread; i++)
 	{
-		if(strcmp(argv[1], "-i") == 0)
+		if(strcmp(argv[1], "iops") == 0)
 			pthread_create(&tid[i], NULL, IOPS, NULL);
-		else if(strcmp(argv[1], "-f") == 0)
+		else if(strcmp(argv[1], "flops") == 0)
 			pthread_create(&tid[i], NULL, FLOPS, NULL);
 		else
 		{

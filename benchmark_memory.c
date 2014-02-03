@@ -5,15 +5,17 @@
 #include <pthread.h>
 
 //300MB
-#define MEM 30000000
+#define MEM 300000000
 
+//sequential access the memory
 void *sequential_access(void *block_size)
 {
 	int i;
 	int size = (int)(long)block_size;
 	char *a = (char*)malloc(sizeof(char) * MEM);
 	//char* b = (char*)malloc(sizeof(char) * size);
-
+	
+	//copy memory block by block to new allocated memories
 	for(i = 0; i < MEM/size; i++)
 	{
 		char *b = (char*)malloc(sizeof(char) * size);
@@ -21,6 +23,7 @@ void *sequential_access(void *block_size)
 	}
 }
 
+//random access the memory
 void *random_access(void *block_size)
 {
 	int i, ran;
@@ -29,7 +32,8 @@ void *random_access(void *block_size)
 	//char* b = (char*)malloc(sizeof(char) * size);
 
 	srand((unsigned)time(NULL));
-
+	
+	//copy memory randomly to new allocated memories
 	for(i = 0; i < MEM/size; i++)
 	{
 		ran = rand()%(MEM/size);
@@ -40,6 +44,7 @@ void *random_access(void *block_size)
 
 int main(int argc, char const *argv[])
 {
+	//check the input parameters
 	if(argc != 4)
 	{
 		printf("usage: %s <access type> <block size> <num of threads>\n", argv[0]);
@@ -48,9 +53,11 @@ int main(int argc, char const *argv[])
 	}
 
 	int i;
+	//number of threads
 	int numThread = atoi(argv[3]);
 	pthread_t tid[numThread];
-
+	
+	//get block size
 	int block_size;
 	if(strcmp(argv[2], "1b") == 0)
 	{
@@ -73,7 +80,8 @@ int main(int argc, char const *argv[])
 	//variables to count the time
 	struct timeval etstart, etstop;
 	unsigned long long usecstart, usecstop;
-
+	
+	//start time
 	gettimeofday(&etstart, NULL);
 
 	//do memcpy for each thread
@@ -95,7 +103,8 @@ int main(int argc, char const *argv[])
 	{
 		pthread_join(tid[i], NULL);
 	}
-
+	
+	//end time
 	gettimeofday(&etstop, NULL);
 	usecstart = (unsigned long long)etstart.tv_sec * 1000000 + etstart.tv_usec;
 	usecstop = (unsigned long long)etstop.tv_sec * 1000000 + etstop.tv_usec;

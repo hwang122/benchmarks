@@ -55,32 +55,29 @@ void *Ser_TCP(void *thread_id)
 	printf("Start listening...\n");
 
 	//receive message from the client
-	while(1)
+	addrlen = sizeof(struct sockaddr);
+	//connected with the client
+	cli_sockfd = accept(ser_sockfd, (struct sockaddr *)&cli_sockfd, &addrlen);
+	if(cli_sockfd == -1)
 	{
-		addrlen = sizeof(struct sockaddr);
-		//connected with the client
-		cli_sockfd = accept(ser_sockfd, (struct sockaddr *)&cli_sockfd, &addrlen);
-		if(cli_sockfd == -1)
+		printf("Error: accept\n");
+		exit(-1);
+	}
+
+	buffer = (char*)malloc(BUFFER_SIZE);
+	size = BUFFER_SIZE;
+	//receive messages from client
+	//if size is 0, all messages have been sent
+	while(size > 0)
+	{
+		size = recv(cli_sockfd, buffer, BUFFER_SIZE, 0);
+		if(size == -1)
 		{
-			printf("Error: accept\n");
+			printf("Error: recv\n");
 			exit(-1);
 		}
-
-		buffer = (char*)malloc(BUFFER_SIZE);
-		size = BUFFER_SIZE;
-		//receive messages from client
-		//if size is 0, all messages have been sent
-		while(size > 0)
-		{
-			size = recv(cli_sockfd, buffer, BUFFER_SIZE, 0);
-			if(size == -1)
-			{
-				printf("Error: recv\n");
-				exit(-1);
-			}
-		}
-		close(cli_sockfd);
 	}
+	close(cli_sockfd);
 	//close socket
 	close(ser_sockfd);
 }
@@ -122,19 +119,16 @@ void *Ser_UDP(void *thread_id)
 
 	printf("Start receiving...\n");
 	//receive datagram from the client, there is no need to connect
-	while(1)
-	{
-		buffer = (char*)malloc(BUFFER_SIZE);
-		memset(buffer, 0, BUFFER_SIZE);
+	buffer = (char*)malloc(BUFFER_SIZE);
+	memset(buffer, 0, BUFFER_SIZE);
 		
-		//receive messages from client
-		size = recvfrom(sockfd, buffer, BUFFER_SIZE, 0,\
-		 (struct sockaddr *)&addr_cli, &addrlen);
-		if(size == -1)
-		{
-			printf("Error: recvfrom\n");
-			exit(-1);
-		}
+	//receive messages from client
+	size = recvfrom(sockfd, buffer, BUFFER_SIZE, 0,\
+		(struct sockaddr *)&addr_cli, &addrlen);
+	if(size == -1)
+	{
+		printf("Error: recvfrom\n");
+		exit(-1);
 	}
 	//close socket
 	close(sockfd);

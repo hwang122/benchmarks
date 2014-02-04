@@ -11,28 +11,28 @@
 //Do OPT number of float operations
 void *FLOPS()
 {
-	double a = 0.1, b = 0.2, c = 0.3, d = 0.4, e = 0.5;
+	double a = 0.1, b = 0.2, c = 0.3, d = 0.4;
 	int i;
-	//each loop contains 5 float operations
+	//each loop contains 4 float operations
 	//run multiple instructions concurrently
-	for(i = 0; i < OPT/5; i++)
+	for(i = 0; i < OPT/4; i++)
 	{
-		a += PI; b += PI; c += PI;
-		d *= PI; e *= PI;
+		a += PI; b += PI;
+		c *= PI; d *= PI;
 	}
 }
 
 //Do OPT number of integer operations
 void *IOPS()
 {
-	int a = 1, b = 2, c = 3, d = 4, e = 5, f = 6;
+	int a = 1, b = 2, c = 3, d = 4, e = 5;
 	int i;
-	//each loop contains 5 integer operations
+	//each loop contains 4 integer operations
 	//run multiple instructions concurrently
-	for(i = 0; i < OPT/5; i++)
+	for(i = 0; i < OPT/4; i++)
 	{
-		a += f; b += f; c += f;
-		d *= f; e *= f;
+		a += e; b += e;
+		c *= e; d *= e;
 	}
 }
 
